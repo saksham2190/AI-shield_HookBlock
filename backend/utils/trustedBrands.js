@@ -1,0 +1,30 @@
+const trustedBrands = [
+    "google",
+    "gmail",
+    "youtube",
+    "facebook",
+    "instagram",
+    "whatsapp",
+    "amazon",
+    "flipkart",
+    "paypal",
+    "netflix",
+    "apple",
+    "microsoft",
+    "github",
+    "linkedin",
+    "x",
+    "twitter",
+    "snapchat",
+    "telegram",
+    "phonepe",
+    "paytm",
+    "upi",
+    "hdfc",
+    "icici",
+    "sbi",
+    "axis",
+    "kotak"
+];
+
+module.exports = trustedBrands;
