@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "HookBlock",
+  "version": "1.0.0",
+  "description": "AI-powered Chrome extension that blocks phishing hooks before they steal your data.",
+
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "HookBlock"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
