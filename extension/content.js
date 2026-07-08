@@ -2,7 +2,7 @@
 
     const currentURL = window.location.href;
 
-    console.log("🌍 Scanning:", currentURL);
+    console.log("🌍 HookBlock Scanning:", currentURL);
 
     chrome.runtime.sendMessage({
 
@@ -12,7 +12,15 @@
 
     }, (response) => {
 
-        console.log("Scan Result", response);
+        if (chrome.runtime.lastError) {
+
+            console.error(chrome.runtime.lastError);
+
+            return;
+
+        }
+
+        console.log("✅ HookBlock Scan Result:", response);
 
     });
 

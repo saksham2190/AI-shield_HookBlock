@@ -1,13 +1,11 @@
 const API_URL = "http://localhost:5000/api/analyze";
 
-let latestScan = null;
-
 // Extension Installed
 chrome.runtime.onInstalled.addListener(() => {
     console.log("🪝 HookBlock Installed");
 });
 
-// Listen for URL from content script
+// Listen for messages
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.type === "SCAN_URL") {
@@ -15,8 +13,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         analyzeWebsite(message.url)
             .then(result => {
 
-                latestScan = result;
+                // Save latest scan
+                chrome.storage.local.set({
+                    latestScan: result
+                });
 
+                // Update browser badge
                 updateBadge(result.score);
 
                 sendResponse(result);
@@ -24,7 +26,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             })
             .catch(error => {
 
-                console.error(error);
+                console.error("HookBlock Error:", error);
 
                 sendResponse({
                     success: false,
@@ -38,8 +40,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.type === "GET_RESULT") {
 
-        sendResponse(latestScan);
+        chrome.storage.local.get(["latestScan"], (data) => {
 
+            sendResponse(data.latestScan || null);
+
+        });
+
+        return true;
     }
 
 });

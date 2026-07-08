@@ -1,16 +1,17 @@
 window.onload = () => {
 
-    chrome.runtime.sendMessage({
+    chrome.storage.local.get(["latestScan"], (storage) => {
 
-        type: "GET_RESULT"
-
-    }, (data) => {
+        const data = storage.latestScan;
 
         const result = document.getElementById("result");
 
         if (!data) {
 
-            result.innerHTML = "No Scan Available";
+            result.innerHTML = `
+                <h3>No Scan Available</h3>
+                <p>Open a website first, then reopen HookBlock.</p>
+            `;
 
             return;
 
@@ -18,25 +19,25 @@ window.onload = () => {
 
         result.innerHTML = `
 
-<b>Risk :</b> ${data.risk}
+        <b>Risk :</b> ${data.risk}
 
-<br><br>
+        <br><br>
 
-<b>Score :</b> ${data.score}
+        <b>Score :</b> ${data.score}
 
-<br><br>
+        <br><br>
 
-<b>Domain Age :</b> ${data.domainAge}
+        <b>Domain Age :</b> ${data.domainAge ?? "Unknown"}
 
-<br><br>
+        <br><br>
 
-<b>Flags</b>
+        <b>Flags</b>
 
-<br>
+        <br>
 
-${data.flags.join("<br>")}
+        ${data.flags.join("<br>")}
 
-`;
+        `;
 
     });
 
