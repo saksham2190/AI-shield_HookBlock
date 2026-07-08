@@ -1,38 +1,45 @@
-const model=require("../config/geminiConfig");
+const model = require("../config/geminiConfig");
 
-const buildPrompt=require("./geminiPrompt");
+const buildPrompt = require("./promptBuilder");
 
-const parseAI=require("./parser");
+const parseAIResponse = require("./Parser");
 
-async function analyzeWithAI(data){
+async function analyzeWithAI(data) {
 
-try{
+    try {
 
-const prompt=buildPrompt(data);
+        const prompt = buildPrompt(data);
 
-const result=await model.generateContent(prompt);
+        const result = await model.generateContent(prompt);
 
-const response=result.response.text();
+        const response = await result.response;
 
-return parseAI(response);
+        const text = response.text();
+
+        return parseAIResponse(text);
+
+    } catch (error) {
+
+        console.error("Gemini Error:", error.message);
+
+        return {
+
+            summary:
+                "AI explanation is currently unavailable.",
+
+            reasons: [
+                "Gemini service failed."
+            ],
+
+            recommendation:
+                "Use the rule-based analysis.",
+
+            confidence: 0
+
+        };
+
+    }
 
 }
-catch(err){
 
-return{
-
-phishingProbability:0,
-
-confidence:0,
-
-risk:"Unknown",
-
-reason:"Gemini unavailable"
-
-};
-
-}
-
-}
-
-module.exports=analyzeWithAI;
+module.exports = analyzeWithAI;
