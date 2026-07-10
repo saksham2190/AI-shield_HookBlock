@@ -21,15 +21,19 @@
 
         if (!response || !response.success) {
 
-            console.log("Scan failed");
+            console.log("❌ Scan Failed");
             return;
 
         }
 
-        console.log("Response:", response);
+        console.log("✅ HookBlock Scan Result:", response);
 
-        // Temporary test
-        showHookBlockOverlay(response);
+        // Only show warning for dangerous websites
+        if (response.score < 40) {
+
+            showHookBlockOverlay(response);
+
+        }
 
     });
 

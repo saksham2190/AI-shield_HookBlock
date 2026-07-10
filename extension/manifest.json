@@ -31,9 +31,24 @@
         "<all_urls>"
       ],
       "js": [
+        "overlay.js",
         "content.js"
       ],
+      "css": [
+        "styles/warning.css"
+      ],
       "run_at": "document_idle"
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

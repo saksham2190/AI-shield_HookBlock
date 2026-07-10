@@ -1,0 +1,591 @@
+/* =======================================================
+   HookBlock Professional Overlay
+   Part 1 - Layout, Card, Header, Sections
+======================================================= */
+
+#hookblock-overlay{
+    position:fixed;
+    inset:0;
+    z-index:2147483647;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,.82);
+    backdrop-filter:blur(10px);
+    animation:hbFade .25s ease;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+
+.hb-overlay{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:25px;
+}
+
+.hb-card{
+
+    width:min(720px,95vw);
+
+    max-height:90vh;
+
+    overflow-y:auto;
+
+    background:#111827;
+
+    border:2px solid #dc2626;
+
+    border-radius:18px;
+
+    color:#ffffff;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.55),
+        0 0 40px rgba(220,38,38,.30);
+
+    animation:hbPop .35s ease;
+
+}
+
+/* ==========================
+            HEADER
+========================== */
+
+.hb-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:28px;
+
+    background:linear-gradient(
+        90deg,
+        #7f1d1d,
+        #991b1b,
+        #dc2626
+    );
+
+}
+
+.hb-logo{
+
+    width:72px;
+    height:72px;
+
+    flex-shrink:0;
+
+    background:#ffffff;
+
+    border-radius:16px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.hb-logo img{
+
+    width:48px;
+    height:48px;
+}
+
+.hb-header h1{
+
+    margin:0;
+
+    font-size:32px;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+}
+
+.hb-header p{
+
+    margin-top:6px;
+
+    color:#ffecec;
+
+    font-size:15px;
+}
+
+/* ==========================
+       WARNING STRIP
+========================== */
+
+.hb-warning{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:12px;
+
+    padding:20px;
+
+    background:#450a0a;
+
+    border-bottom:1px solid #7f1d1d;
+}
+
+.hb-warning-icon{
+
+    width:42px;
+
+    animation:hbPulse 1.5s infinite;
+}
+
+.hb-warning h2{
+
+    margin:0;
+
+    font-size:24px;
+
+    color:#fecaca;
+
+    letter-spacing:1px;
+}
+
+/* ==========================
+        SCORE BOX
+========================== */
+
+.hb-score-box{
+
+    text-align:center;
+
+    padding:30px;
+
+    border-bottom:1px solid #1f2937;
+}
+
+.hb-score{
+
+    display:block;
+
+    font-size:72px;
+
+    font-weight:800;
+
+    color:#ef4444;
+
+    line-height:1;
+}
+
+.hb-score-text{
+
+    display:block;
+
+    margin-top:10px;
+
+    color:#9ca3af;
+
+    font-size:15px;
+
+    letter-spacing:1px;
+}
+
+/* ==========================
+        CONTENT
+========================== */
+
+.hb-section{
+
+    padding:24px 30px;
+
+    border-top:1px solid #1f2937;
+}
+
+.hb-section h3{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin:0 0 15px;
+
+    color:#f87171;
+
+    font-size:20px;
+}
+
+.hb-section h3 img{
+
+    width:28px;
+}
+
+.hb-section p{
+
+    margin:0;
+
+    line-height:1.8;
+
+    color:#e5e7eb;
+
+    font-size:15px;
+}
+
+.hb-section ul{
+
+    margin:0;
+
+    padding-left:22px;
+}
+
+.hb-section li{
+
+    margin:12px 0;
+
+    color:#f3f4f6;
+
+    line-height:1.6;
+}
+
+/* ==========================
+      CONFIDENCE BOX
+========================== */
+
+.hb-confidence{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin:25px 30px;
+
+    padding:18px 22px;
+
+    background:#1f2937;
+
+    border-radius:12px;
+
+    border:1px solid #374151;
+
+    font-size:18px;
+}
+
+.hb-confidence strong{
+
+    color:#22c55e;
+
+    font-size:28px;
+}
+
+/* ==========================
+        ANIMATIONS
+========================== */
+
+@keyframes hbFade{
+
+    from{
+        opacity:0;
+    }
+
+    to{
+        opacity:1;
+    }
+
+}
+
+@keyframes hbPop{
+
+    from{
+
+        transform:scale(.92);
+
+        opacity:0;
+
+    }
+
+    to{
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes hbPulse{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.12);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+/* =======================================================
+   HookBlock Professional Overlay
+   Part 2 - Buttons, Footer, Responsive & Polish
+======================================================= */
+
+/* ==========================
+        BUTTONS
+========================== */
+
+.hb-buttons{
+
+    display:flex;
+
+    gap:18px;
+
+    padding:0 30px 30px;
+}
+
+.hb-buttons button{
+
+    flex:1;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    transition:all .25s ease;
+
+    letter-spacing:.3px;
+}
+
+/* Leave Button */
+
+#hb-leave{
+
+    background:#dc2626;
+
+    color:#fff;
+
+    box-shadow:0 8px 25px rgba(220,38,38,.35);
+}
+
+#hb-leave:hover{
+
+    background:#ef4444;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 35px rgba(239,68,68,.45);
+}
+
+/* Continue Button */
+
+#hb-continue{
+
+    background:#374151;
+
+    color:#fff;
+}
+
+#hb-continue:hover{
+
+    background:#4b5563;
+
+    transform:translateY(-3px);
+}
+
+.hb-buttons button:active{
+
+    transform:scale(.98);
+}
+
+/* ==========================
+           FOOTER
+========================== */
+
+.hb-footer{
+
+    padding:18px 28px;
+
+    text-align:center;
+
+    background:#0f172a;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    border-top:1px solid #334155;
+
+    line-height:1.6;
+}
+
+/* ==========================
+         SCROLLBAR
+========================== */
+
+.hb-card::-webkit-scrollbar{
+
+    width:8px;
+}
+
+.hb-card::-webkit-scrollbar-thumb{
+
+    background:#ef4444;
+
+    border-radius:10px;
+}
+
+.hb-card::-webkit-scrollbar-track{
+
+    background:#1f2937;
+}
+
+/* ==========================
+      HOVER EFFECTS
+========================== */
+
+.hb-card{
+
+    transition:.25s ease;
+}
+
+.hb-card:hover{
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.65),
+        0 0 55px rgba(239,68,68,.45);
+}
+
+.hb-section{
+
+    transition:.25s;
+}
+
+.hb-section:hover{
+
+    background:#182235;
+}
+
+/* ==========================
+      LIST STYLING
+========================== */
+
+.hb-section ul{
+
+    list-style:none;
+
+    padding-left:0;
+}
+
+.hb-section li{
+
+    position:relative;
+
+    padding-left:30px;
+}
+
+.hb-section li::before{
+
+    content:"✔";
+
+    position:absolute;
+
+    left:0;
+
+    color:#22c55e;
+
+    font-weight:bold;
+}
+
+/* ==========================
+      RESPONSIVE
+========================== */
+
+@media (max-width:768px){
+
+    .hb-card{
+
+        width:96vw;
+
+        max-height:95vh;
+    }
+
+    .hb-header{
+
+        flex-direction:column;
+
+        text-align:center;
+    }
+
+    .hb-warning{
+
+        flex-direction:column;
+    }
+
+    .hb-score{
+
+        font-size:56px;
+    }
+
+    .hb-buttons{
+
+        flex-direction:column;
+    }
+
+    .hb-confidence{
+
+        flex-direction:column;
+
+        gap:10px;
+
+        text-align:center;
+    }
+
+}
+
+/* ==========================
+     EXTRA POLISH
+========================== */
+
+.hb-card *{
+
+    box-sizing:border-box;
+}
+
+.hb-header,
+.hb-warning{
+
+    user-select:none;
+}
+
+#hb-leave,
+#hb-continue{
+
+    outline:none;
+}
+
+#hb-leave:focus,
+#hb-continue:focus{
+
+    box-shadow:0 0 0 3px rgba(255,255,255,.25);
+}
