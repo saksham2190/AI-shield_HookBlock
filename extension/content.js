@@ -4,33 +4,31 @@
 
     console.log("🌍 HookBlock Scanning:", currentURL);
 
-    chrome.runtime.sendMessage({
+    chrome.runtime.sendMessage(
+        {
+            type: "SCAN_URL",
+            url: currentURL
+        },
+        (response) => {
 
-        type: "SCAN_URL",
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError);
+                return;
+            }
 
-        url: currentURL
+            if (!response || !response.success) {
+                console.log("❌ Scan Failed");
+                return;
+            }
 
-    }, (response) => {
+            console.log("✅ HookBlock Scan Result:", response);
 
-        if (chrome.runtime.lastError) {
-
-            console.error(chrome.runtime.lastError);
-            return;
+            // Show overlay ONLY for dangerous websites
+            if (response.score < 40) {
+                showHookBlockOverlay(response);
+            }
 
         }
-
-        if (!response || !response.success) {
-
-            console.log("Scan failed");
-            return;
-
-        }
-
-        console.log("Response:", response);
-
-        // Temporary test
-        showHookBlockOverlay(response);
-
-    });
+    );
 
 })();
