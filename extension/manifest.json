@@ -32,12 +32,13 @@
     "styles/warning.css",
     "styles/sensitive.css"
 ],
-     "js": [
-      "security/formProtector.js",
-     "security/sensitiveDetector.js",
+      "js": [
+    "security/formProtector.js",
+    "security/sensitiveDetector.js",
+    "security/submissionGuard.js",
     "overlay.js",
-     "content.js"
-    ],
+    "content.js"
+  ],
     "run_at": "document_idle"
     }
   ],

@@ -1,5 +1,6 @@
-// Create Sensitive Detector
+// Create HookBlock components
 const detector = new SensitiveDetector();
+const submissionGuard = new SubmissionGuard();
 
 (async () => {
 
@@ -26,10 +27,7 @@ const detector = new SensitiveDetector();
 
             console.log("✅ HookBlock Scan Result:", response);
 
-            // Start monitoring ALL pages that contain forms
-            detector.start(response);
-
-            // Show overlay only on dangerous websites
+            // Show warning overlay only for dangerous websites
             if (response.score < 40) {
 
                 if (typeof showHookBlockOverlay === "function") {
@@ -37,6 +35,12 @@ const detector = new SensitiveDetector();
                 }
 
             }
+
+            // Start monitoring sensitive fields on ALL websites
+            detector.start(response);
+
+            // Protect form submissions
+            submissionGuard.start(response);
 
         }
     );
