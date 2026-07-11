@@ -1,3 +1,6 @@
+// Create Sensitive Detector
+const detector = new SensitiveDetector();
+
 (async () => {
 
     const currentURL = window.location.href;
@@ -23,9 +26,16 @@
 
             console.log("✅ HookBlock Scan Result:", response);
 
-            // Show overlay ONLY for dangerous websites
+            // Start monitoring ALL pages that contain forms
+            detector.start(response);
+
+            // Show overlay only on dangerous websites
             if (response.score < 40) {
-                showHookBlockOverlay(response);
+
+                if (typeof showHookBlockOverlay === "function") {
+                    showHookBlockOverlay(response);
+                }
+
             }
 
         }

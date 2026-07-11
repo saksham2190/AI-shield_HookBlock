@@ -1,113 +1,83 @@
-// ===============================
+// ==========================================
 // HookBlock Sensitive Data Detector
-// ===============================
+// ==========================================
 
-function detectSensitiveFields() {
+class SensitiveDetector {
 
-    const detected = [];
+    constructor() {
+        this.scanResult = null;
+        this.started = false;
+    }
 
-    const inputs = document.querySelectorAll("input");
+    start(scanResult) {
 
-    inputs.forEach(input => {
+        if (this.started) return;
 
-        const type = (input.type || "").toLowerCase();
+        this.started = true;
+        this.scanResult = scanResult;
 
-        const name = (input.name || "").toLowerCase();
+        this.detectSensitiveFields();
 
-        const id = (input.id || "").toLowerCase();
+        const observer = new MutationObserver(() => {
+            this.detectSensitiveFields();
+        });
 
-        const placeholder = (input.placeholder || "").toLowerCase();
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
 
-        const text = `${type} ${name} ${id} ${placeholder}`;
+    }
 
-        // Password
-        if (type === "password") {
+    detectSensitiveFields() {
 
-            detected.push("Password");
+        const fields = document.querySelectorAll("input");
 
-        }
+        fields.forEach(field => {
 
-        // Email
-        if (type === "email" || text.includes("email")) {
+            if (field.dataset.hookblockAttached) return;
 
-            detected.push("Email");
+            field.dataset.hookblockAttached = "true";
 
-        }
+            field.addEventListener("input", () => {
 
-        // Phone
-        if (
-            type === "tel" ||
-            text.includes("phone") ||
-            text.includes("mobile")
-        ) {
+                let type = "";
 
-            detected.push("Phone");
+                if (field.type === "password") {
+                    type = "Password";
+                }
+                else if (field.type === "email") {
+                    type = "Email Address";
+                }
+                else if (
+                    field.name &&
+                    field.name.toLowerCase().includes("card")
+                ) {
+                    type = "Credit Card";
+                }
+                else if (
+                    field.name &&
+                    field.name.toLowerCase().includes("cvv")
+                ) {
+                    type = "CVV";
+                }
+                else {
+                    return;
+                }
 
-        }
+                console.log("🔒 Sensitive field detected:", type);
 
-        // OTP
-        if (
-            text.includes("otp") ||
-            text.includes("verification")
-        ) {
+                if (typeof showSensitiveBanner === "function") {
+                    showSensitiveBanner(type);
+                }
 
-            detected.push("OTP");
+            });
 
-        }
+        });
 
-        // Credit Card
-        if (
-            text.includes("card") ||
-            text.includes("credit") ||
-            text.includes("debit")
-        ) {
-
-            detected.push("Credit Card");
-
-        }
-
-        // CVV
-        if (
-            text.includes("cvv") ||
-            text.includes("cvc")
-        ) {
-
-            detected.push("CVV");
-
-        }
-
-        // Aadhaar
-        if (
-            text.includes("aadhaar") ||
-            text.includes("aadhar")
-        ) {
-
-            detected.push("Aadhaar");
-
-        }
-
-        // PAN
-        if (
-            text.includes("pan")
-        ) {
-
-            detected.push("PAN");
-
-        }
-
-        // UPI
-        if (
-            text.includes("upi")
-        ) {
-
-            detected.push("UPI");
-
-        }
-
-    });
-
-    return [...new Set(detected)];
+    }
 
 }
 
-window.detectSensitiveFields = detectSensitiveFields;
+// Make available globally
+window.SensitiveDetector = SensitiveDetector;
