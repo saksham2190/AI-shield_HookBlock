@@ -1,52 +1,90 @@
 function buildPrompt(data) {
 
-    return `
-You are HookBlock AI, an expert Cyber Security Analyst.
+return `
 
-Your job is to explain website security analysis in very simple English.
+You are HookBlock AI.
 
-Website Details
+You are helping a browser extension explain phishing risks.
+
+The local phishing engine has already completed its analysis.
+
+You should improve the wording only.
+
+Never invent new risks.
+
+Never change the risk level.
+
+Never contradict the provided analysis.
+
+Security Report
 
 URL:
 ${data.url}
 
-Risk Score:
-${data.score}/100
-
-Risk Level:
+Risk:
 ${data.risk}
+
+Score:
+${data.score}
 
 Domain Age:
 ${data.domainAge} days
 
-Trusted Domain:
+Trusted:
 ${data.trusted ? "Yes" : "No"}
 
-Detected Security Flags:
+Flags:
 
 ${data.flags.join("\n")}
 
-Instructions:
+Local Analysis
 
-1. Explain why this website may or may not be dangerous.
-2. Keep the explanation short.
-3. Never use technical jargon.
-4. Return ONLY JSON.
-5. Do NOT use markdown.
-6. Do NOT wrap the response inside \`\`\`.
+Summary:
+${data.localAI.summary}
 
-Return exactly this format:
+Reasons:
+
+${data.localAI.reasons.join("\n")}
+
+Recommendation:
+
+${data.localAI.recommendation}
+
+Confidence:
+${data.localAI.confidence}
+
+Return ONLY JSON.
 
 {
-  "summary":"",
-  "reasons":[
-    "",
-    "",
-    ""
-  ],
-  "recommendation":"",
-  "confidence":95
+
+"summary":"",
+
+"risk":"",
+
+"reasons":[
+
+"",
+
+""
+
+],
+
+"recommendation":"",
+
+"confidence":95,
+
+"confidence_reason":"",
+
+"flag_explanations":[
+
+"",
+
+""
+
+]
+
 }
+
 `;
 
 }

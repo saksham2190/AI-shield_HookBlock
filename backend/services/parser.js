@@ -1,26 +1,50 @@
-function parseAI(text){
+function parseAI(text) {
 
-try{
+    try {
 
-return JSON.parse(text);
+        const data = JSON.parse(text);
+
+        return {
+
+            summary:
+                data.summary || "No summary available.",
+
+            risk:
+                data.risk || "UNKNOWN",
+
+            reasons:
+                Array.isArray(data.reasons)
+                    ? data.reasons
+                    : [],
+
+            recommendation:
+                data.recommendation ||
+                "Proceed carefully.",
+
+            confidence:
+                typeof data.confidence === "number"
+                    ? data.confidence
+                    : 80,
+
+            confidence_reason:
+                data.confidence_reason ||
+                "Confidence calculated using multiple security indicators.",
+
+            flag_explanations:
+                Array.isArray(data.flag_explanations)
+                    ? data.flag_explanations
+                    : []
+
+        };
+
+    }
+
+    catch {
+
+        return {};
+
+    }
 
 }
-catch{
 
-return{
-
-phishingProbability:0,
-
-confidence:0,
-
-risk:"Unknown",
-
-reason:"Unable to parse AI response"
-
-};
-
-}
-
-}
-
-module.exports=parseAI;
+module.exports = parseAI;

@@ -6,6 +6,8 @@ const isTrustedDomain = require("../services/trustedDomainService");
 const analyzeWithAI = require("../services/aiService");
 const shouldCallAI = require("../utils/aiThreshold");
 
+const buildLocalAI = require("../services/aiEngine");
+
 const analyzeURL = async (req, res) => {
 
     try {
@@ -28,13 +30,13 @@ const analyzeURL = async (req, res) => {
         const result = analyze(url);
 
         // ===============================
-        // WHOIS Analysis
+        // WHOIS
         // ===============================
 
         const whoisResult = await getDomainAge(url);
 
         // ===============================
-        // Trusted Domain Check
+        // Trusted Domain
         // ===============================
 
         const trustedResult = isTrustedDomain(url);
@@ -43,29 +45,25 @@ const analyzeURL = async (req, res) => {
 
             result.score += 20;
 
-            if (result.score > 100) {
-
+            if (result.score > 100)
                 result.score = 100;
-
-            }
 
         }
 
         result.flags.push(trustedResult.message);
-
         result.flags.push(whoisResult.flag);
 
         // ===============================
-        // Final Risk Score
+        // Final Score
         // ===============================
 
         const finalResult = calculateRisk(result, whoisResult);
 
         // ===============================
-        // AI Explanation
+        // AI
         // ===============================
 
-        let ai = null;
+        let ai;
 
         if (shouldCallAI(finalResult.score, trustedResult.trusted)) {
 
@@ -87,32 +85,24 @@ const analyzeURL = async (req, res) => {
 
         } else {
 
-            ai = {
+            ai = buildLocalAI({
 
-                summary:
-                    "This website appears safe based on our security checks.",
+    score: finalResult.score,
 
-                reasons: [
+    risk: finalResult.risk,
 
-                    "No major phishing indicators were detected.",
+    flags: result.flags,
 
-                    "The domain appears trustworthy.",
+    trusted: trustedResult.trusted,
 
-                    "The overall security score is good."
+    domainAge: whoisResult.age
 
-                ],
-
-                recommendation:
-                    "You may continue browsing, but always verify sensitive websites before entering personal information.",
-
-                confidence: 95
-
-            };
+});
 
         }
 
         // ===============================
-        // Final Response
+        // Response
         // ===============================
 
         return res.status(200).json({
@@ -135,7 +125,9 @@ const analyzeURL = async (req, res) => {
 
         });
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
