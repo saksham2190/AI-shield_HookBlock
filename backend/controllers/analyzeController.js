@@ -1,5 +1,6 @@
 const analyze = require("../services/urlAnalyzer");
 const getDomainAge = require("../services/whoisService");
+const analyzeSSL = require("../services/sslAnalyzer");
 const calculateRisk = require("../services/riskScorer");
 const isTrustedDomain = require("../services/trustedDomainService");
 
@@ -34,6 +35,7 @@ const analyzeURL = async (req, res) => {
         // ===============================
 
         const whoisResult = await getDomainAge(url);
+        const sslResult = await analyzeSSL(url);
 
         // ===============================
         // Trusted Domain
@@ -52,6 +54,7 @@ const analyzeURL = async (req, res) => {
 
         result.flags.push(trustedResult.message);
         result.flags.push(whoisResult.flag);
+        result.flags.push(sslResult.flag);
 
         // ===============================
         // Final Score
@@ -120,6 +123,18 @@ const analyzeURL = async (req, res) => {
             domainAge: whoisResult.age,
 
             trusted: trustedResult.trusted,
+
+            ssl: {
+
+            issuer: sslResult.issuer,
+
+            valid: sslResult.valid,
+
+            expiresIn: sslResult.remainingDays,
+
+            selfSigned: sslResult.selfSigned
+
+},
 
             ai
 
