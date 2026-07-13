@@ -18,14 +18,11 @@ const FLAG_EXPLANATIONS = {
     "Old Domain":
         "The domain has existed for a long time, which generally increases trustworthiness.",
 
-    "Domain Age: Recently Registered":
-        "The website was registered recently, making it more likely to be associated with phishing campaigns.",
-
     "Brand Spoof":
         "The website appears to imitate a legitimate brand by using a similar-looking domain name.",
 
     "Suspicious Keyword":
-        "The URL contains words that are frequently found in phishing websites such as 'login', 'verify', 'secure', or 'update'.",
+        "The URL contains words that are frequently found in phishing websites such as login, verify, secure or update.",
 
     "Long URL":
         "The unusually long URL may be attempting to hide suspicious paths or mislead users.",
@@ -34,22 +31,25 @@ const FLAG_EXPLANATIONS = {
         "The website uses an IP address instead of a domain name, which is uncommon for legitimate services.",
 
     "Expired SSL":
-        "The SSL certificate has expired, reducing the trustworthiness of the secure connection."
+        "The SSL certificate has expired, reducing the trustworthiness of the secure connection.",
+
+    "SSL Valid":
+        "The website's SSL certificate is valid and the encrypted connection is secure.",
+
+    "DNS Resolved":
+        "The domain successfully resolves to a valid server, indicating normal DNS configuration."
 
 };
 
-// Normalize every possible risk string
 function normalizeRisk(risk) {
 
     if (!risk) return "UNKNOWN";
 
     const r = risk.toString().trim().toUpperCase();
 
-    if (r === "SAFE")
-        return "SAFE";
+    if (r === "SAFE") return "SAFE";
 
-    if (r === "LOW" || r === "LOW RISK")
-        return "LOW RISK";
+    if (r === "LOW" || r === "LOW RISK") return "LOW RISK";
 
     if (r === "MODERATE" || r === "MEDIUM" || r === "MODERATE RISK")
         return "MODERATE RISK";
@@ -104,65 +104,157 @@ function summary(score, risk, flags) {
 
 }
 
-function confidence(score, flags, result = {}) {
+function confidence(result) {
 
-    let value = 100;
+    let value = 50;
 
-    // --------------------------
-    // Risk score effect
-    // --------------------------
+    // ==========================
+    // Website Score
+    // ==========================
 
-    if (score < 90)
-        value -= 5;
+    if (result.score >= 95)
+        value += 18;
+    else if (result.score >= 80)
+        value += 12;
+    else if (result.score >= 60)
+        value += 6;
+    else if (result.score >= 40)
+        value += 2;
 
-    if (score < 80)
-        value -= 10;
+    // ==========================
+    // Trusted Domain
+    // ==========================
 
-    if (score < 60)
-        value -= 10;
+    if (result.trusted)
+        value += 15;
 
-    if (score < 40)
-        value -= 10;
+    // ==========================
+    // Domain Age
+    // ==========================
 
-    if (score < 20)
-        value -= 10;
+    if (result.domainAge >= 3650)
+        value += 12;
 
-    // --------------------------
-    // Too many indicators
-    // --------------------------
+    else if (result.domainAge >= 365)
+        value += 8;
 
-    if (flags.length >= 3)
-        value -= 5;
+    else if (result.domainAge >= 90)
+        value += 4;
 
-    if (flags.length >= 5)
-        value -= 5;
+    else
+        value -= 12;
 
-    // --------------------------
-    // Unknown domain
-    // --------------------------
+    // ==========================
+    // SSL
+    // ==========================
 
-    if (result.trusted === false)
-        value -= 5;
+    if (result.flags.includes("SSL Valid"))
+        value += 6;
 
-    // --------------------------
-    // Very new domain
-    // --------------------------
+    if (result.flags.includes("Expired SSL"))
+        value -= 12;
 
-    if (
-        result.domainAge !== undefined &&
-        result.domainAge >= 0 &&
-        result.domainAge < 30
-    ) {
-        value -= 10;
+    // ==========================
+    // HTTPS
+    // ==========================
+
+    if (result.flags.includes("HTTPS Enabled"))
+        value += 5;
+
+    if (result.flags.includes("No HTTPS"))
+        value -= 12;
+
+    // ==========================
+    // DNS
+    // ==========================
+
+    if (result.flags.includes("DNS Resolved"))
+        value += 4;
+
+    // ==========================
+    // Phishing Indicators
+    // ==========================
+
+    result.flags.forEach(flag => {
+
+        if (flag.startsWith("Suspicious keyword"))
+            value -= 5;
+
+        if (flag.includes("Brand Spoof"))
+            value -= 12;
+
+        if (flag.includes("IP Address"))
+            value -= 10;
+
+        if (flag.includes("Long URL"))
+            value -= 4;
+
+    });
+
+    // ==========================
+    // Risk Adjustment
+    // ==========================
+
+    switch (normalizeRisk(result.risk)) {
+
+        case "SAFE":
+            value += 6;
+            break;
+
+        case "LOW RISK":
+            value += 2;
+            break;
+
+        case "MODERATE RISK":
+            value -= 5;
+            break;
+
+        case "HIGH RISK":
+            value -= 12;
+            break;
+
+        case "CRITICAL RISK":
+            value -= 20;
+            break;
+
     }
+
+    // Clamp
 
     if (value > 99)
         value = 99;
 
-    if (value < 40)
-        value = 40;
+    if (value < 10)
+        value = 10;
 
-    return value;
+    return Math.round(value);
+
+}
+
+function explainFlag(flag, result) {
+
+    if (flag.startsWith("Domain Age:")) {
+
+        if (result.domainAge >= 365) {
+
+            return `The domain has existed for ${result.domainAge} days, which generally increases its credibility.`;
+
+        }
+
+        return `The domain was registered only ${result.domainAge} days ago. Newly registered domains deserve additional caution.`;
+
+    }
+
+    if (flag.startsWith("Suspicious keyword:")) {
+
+        const keyword = flag.split(":")[1]?.trim() || "";
+
+        return `The URL contains the suspicious keyword "${keyword}", which is commonly seen in phishing websites.`;
+
+    }
+
+    return FLAG_EXPLANATIONS[flag] ||
+        "This security indicator affected the overall security assessment.";
 
 }
 
@@ -170,10 +262,21 @@ function buildAI(result) {
 
     const risk = normalizeRisk(result.risk);
 
-    const explanations = (result.flags || []).map(flag => {
+    const explanations = [];
 
-        return FLAG_EXPLANATIONS[flag] ||
-            "This security indicator contributed to the overall security assessment.";
+    const used = new Set();
+
+    (result.flags || []).forEach(flag => {
+
+        const explanation = explainFlag(flag, result);
+
+        if (!used.has(explanation)) {
+
+            used.add(explanation);
+
+            explanations.push(explanation);
+
+        }
 
     });
 
@@ -187,10 +290,10 @@ function buildAI(result) {
 
         recommendation: recommendation(risk),
 
-        confidence: confidence(result.score, result.flags),
+        confidence: confidence(result),
 
         confidence_reason:
-            `This assessment is based on ${result.flags.length} independent security indicators including URL analysis, SSL validation, domain age, trusted domain verification and phishing heuristics.`,
+            `This assessment is based on ${result.flags.length} independent security indicators including URL analysis, SSL validation, DNS verification, domain age and phishing heuristics.`,
 
         flag_explanations: explanations
 

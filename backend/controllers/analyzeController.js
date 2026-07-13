@@ -8,6 +8,7 @@ const analyzeWithAI = require("../services/aiService");
 const shouldCallAI = require("../utils/aiThreshold");
 
 const buildLocalAI = require("../services/aiEngine");
+const analyzeDNS = require("../services/dnsAnalyzer");
 
 const analyzeURL = async (req, res) => {
 
@@ -36,6 +37,7 @@ const analyzeURL = async (req, res) => {
 
         const whoisResult = await getDomainAge(url);
         const sslResult = await analyzeSSL(url);
+        const dnsResult = await analyzeDNS(url);
 
         // ===============================
         // Trusted Domain
@@ -55,6 +57,7 @@ const analyzeURL = async (req, res) => {
         result.flags.push(trustedResult.message);
         result.flags.push(whoisResult.flag);
         result.flags.push(sslResult.flag);
+        dnsResult.flags.forEach(flag => result.flags.push(flag));
 
         // ===============================
         // Final Score
@@ -134,7 +137,16 @@ const analyzeURL = async (req, res) => {
 
             selfSigned: sslResult.selfSigned
 
-},
+            },
+            dns: {
+
+            hostname: dnsResult.hostname,
+
+            nameservers: dnsResult.nameservers,
+
+            addresses: dnsResult.addresses
+
+        },
 
             ai
 

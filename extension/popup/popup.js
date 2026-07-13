@@ -224,9 +224,54 @@ window.onload = () => {
 
             </p>
 
+          
+
             <hr>
 
+<h3>🌐 DNS Information</h3>
+
+<p>
+
+    <b>Hostname</b>
+
+    <br>
+
+    ${data.dns?.hostname || "Unknown"}
+
+</p>
+
+<p>
+
+    <b>IP Address</b>
+
+    <br>
+
+    ${
+        data.dns?.addresses && data.dns.addresses.length
+            ? data.dns.addresses.join("<br>")
+            : "Unavailable"
+    }
+
+</p>
+
+<p>
+
+    <b>Name Servers</b>
+
+    <br>
+
+    ${
+        data.dns?.nameservers && data.dns.nameservers.length
+            ? data.dns.nameservers.join("<br>")
+            : "Unavailable"
+    }
+
+</p>
+
+<hr>
+
             <h3>🤖 AI Security Report</h3>
+            
 
             <p>
 
