@@ -12,7 +12,7 @@
   ],
 
   "host_permissions": [
-    "http://localhost:5000/*",
+    "https://ai-shield-hookblock.onrender.com",
     "<all_urls>"
   ],
 

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/analyze";
+const API_URL = "https://ai-shield-hookblock.onrender.com";
 
 // Extension Installed
 chrome.runtime.onInstalled.addListener(() => {
