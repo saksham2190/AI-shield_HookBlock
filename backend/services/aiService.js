@@ -1,7 +1,7 @@
 const model = require("../config/geminiConfig");
 
 const buildPrompt = require("./promptBuilder");
-const parseAI = require("./Parser");
+const parseAI = require("./parser");
 
 const buildLocalAI = require("./aiEngine");
 
