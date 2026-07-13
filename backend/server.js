@@ -22,7 +22,7 @@ app.use("/api", detectorRoute);
 app.get("/", (req, res) => {
     res.json({
         success: true,
-        message: "🚀 PhishShield Backend is Running!"
+        message: "🚀 HookBlock Backend is Running!"
     });
 });
 

@@ -1,7 +1,7 @@
 {
-  "name": "phishshield-backend",
+  "name": "HookBlock",
   "version": "1.0.0",
-  "description": "Backend API for PhishShield Chrome Extension",
+  "description": "AI-powered Chrome extension that blocks phishing hooks before they steal your data.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
