@@ -2,6 +2,45 @@
 // HookBlock Dashboard
 // ==========================================
 
+// Format long URLs for clean display
+function formatUrl(url) {
+    if (!url) return "Unknown";
+
+    try {
+        const parsed = new URL(url);
+
+        // Hostname only
+        const hostname = parsed.hostname;
+
+        // Get pathname but remove unnecessary trailing slash
+        let path = parsed.pathname;
+
+        if (path === "/") {
+            path = "";
+        }
+
+        // Keep pathname short
+        if (path.length > 35) {
+            path = path.substring(0, 32) + "...";
+        }
+
+        return hostname + path;
+
+    } catch (error) {
+        // Fallback for invalid URLs
+        if (url.length > 45) {
+            return url.substring(0, 42) + "...";
+        }
+
+        return url;
+    }
+}
+
+
+// ==========================================
+// Load Dashboard
+// ==========================================
+
 function loadDashboard() {
 
     chrome.storage.local.get(["hookblockHistory"], (storage) => {
@@ -14,22 +53,31 @@ function loadDashboard() {
 
             dashboard.innerHTML = `
                 <div class="card">
+
                     <h3>📊 Today's Activity</h3>
-                    <p>No websites scanned yet.</p>
+
+                    <p>
+                        No websites scanned yet.
+                    </p>
+
                 </div>
             `;
 
             return;
-
         }
+
 
         const total = history.length;
 
-        const dangerous = history.filter(site => site.score < 40).length;
+        const dangerous =
+            history.filter(site => site.score < 40).length;
 
-        const safe = history.filter(site => site.score >= 40).length;
+        const safe =
+            history.filter(site => site.score >= 40).length;
+
 
         const recent = history.slice(0, 5);
+
 
         dashboard.innerHTML = `
 
@@ -37,11 +85,20 @@ function loadDashboard() {
 
                 <h3>📊 Today's Activity</h3>
 
-                <p><b>🌐 Sites Scanned:</b> ${total}</p>
+                <p>
+                    <b>🌐 Sites Scanned:</b>
+                    ${total}
+                </p>
 
-                <p><b>🚨 Dangerous Sites:</b> ${dangerous}</p>
+                <p>
+                    <b>🚨 Dangerous Sites:</b>
+                    ${dangerous}
+                </p>
 
-                <p><b>🟢 Safe Sites:</b> ${safe}</p>
+                <p>
+                    <b>🟢 Safe Sites:</b>
+                    ${safe}
+                </p>
 
                 <hr>
 
@@ -53,7 +110,10 @@ function loadDashboard() {
 
         `;
 
-        const list = document.getElementById("recentScans");
+
+        const list =
+            document.getElementById("recentScans");
+
 
         recent.forEach(site => {
 
@@ -64,11 +124,30 @@ function loadDashboard() {
                         ? "🟡"
                         : "🟢";
 
+
+            const displayUrl =
+                formatUrl(site.url);
+
+
             list.innerHTML += `
-                <li>
+
+                <li
+                    title="${site.url}"
+                    style="
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                        white-space:nowrap;
+                    "
+                >
+
                     ${icon}
-                    ${site.url}
+
+                    <span>
+                        ${displayUrl}
+                    </span>
+
                 </li>
+
             `;
 
         });
@@ -77,51 +156,80 @@ function loadDashboard() {
 
 }
 
+
 // ==========================================
 // Popup
 // ==========================================
 
 window.onload = () => {
 
+    // Load dashboard
     loadDashboard();
 
+
+    // Load latest scan
     chrome.storage.local.get(["latestScan"], (storage) => {
 
         const data = storage.latestScan;
 
-        const result = document.getElementById("result");
+        const result =
+            document.getElementById("result");
+
+
+        // ==========================================
+        // No Scan
+        // ==========================================
 
         if (!data) {
 
             result.innerHTML = `
+
                 <div class="card">
 
                     <h2>No Scan Available</h2>
 
                     <p>
-                        Open a website first and then click HookBlock.
+                        Open a website first and then
+                        click HookBlock.
                     </p>
 
                 </div>
+
             `;
 
             return;
-
         }
+
+
+        // ==========================================
+        // Risk Color
+        // ==========================================
 
         let riskColor = "#2ecc71";
 
-        if (data.score < 20)
+
+        if (data.score < 20) {
+
             riskColor = "#8B0000";
 
-        else if (data.score < 40)
+        } else if (data.score < 40) {
+
             riskColor = "#e74c3c";
 
-        else if (data.score < 60)
+        } else if (data.score < 60) {
+
             riskColor = "#f39c12";
 
-        else if (data.score < 80)
+        } else if (data.score < 80) {
+
             riskColor = "#f1c40f";
+
+        }
+
+
+        // ==========================================
+        // SSL Data
+        // ==========================================
 
         const ssl = data.ssl || {
 
@@ -135,187 +243,326 @@ window.onload = () => {
 
         };
 
+
+        // ==========================================
+        // AI Data
+        // ==========================================
+
         const ai = data.ai || {
 
-            summary: "AI explanation unavailable.",
+            summary:
+                "AI explanation unavailable.",
 
             reasons: [],
 
-            recommendation: "Proceed carefully.",
+            recommendation:
+                "Proceed carefully.",
 
             confidence: 0
 
         };
 
+
+        // ==========================================
+        // Main Result
+        // ==========================================
+
         result.innerHTML = `
 
-        <div class="card">
+            <div class="card">
 
-            <h2 style="color:${riskColor}">
-                ${data.risk.toUpperCase()}
-            </h2>
 
-            <p>
+                <!-- ============================== -->
+                <!-- Risk -->
+                <!-- ============================== -->
 
-                <b>Risk Score</b>
+                <h2 style="color:${riskColor}">
 
-                <br>
+                    ${data.risk.toUpperCase()}
 
-                ${data.score}/100
+                </h2>
 
-            </p>
 
-            <p>
+                <p>
 
-                <b>Domain Age</b>
+                    <b>Risk Score</b>
 
-                <br>
+                    <br>
 
-                ${data.domainAge ?? "Unknown"} days
+                    ${data.score}/100
 
-            </p>
+                </p>
 
-            <hr>
 
-            <h3>🔐 SSL Information</h3>
+                <!-- ============================== -->
+                <!-- Scanned Website -->
+                <!-- ============================== -->
 
-            <p>
+                <p>
 
-                <b>Certificate Status</b>
+                    <b>Website</b>
 
-                <br>
+                    <br>
 
-                ${ssl.valid ? "✅ Valid" : "❌ Invalid"}
+                    <span
+                        title="${data.url}"
+                        style="
+                            display:block;
+                            overflow:hidden;
+                            text-overflow:ellipsis;
+                            white-space:nowrap;
+                        "
+                    >
+                        ${formatUrl(data.url)}
+                    </span>
 
-            </p>
+                </p>
 
-            <p>
 
-                <b>Issuer</b>
+                <!-- ============================== -->
+                <!-- Domain Age -->
+                <!-- ============================== -->
 
-                <br>
+                <p>
 
-                ${ssl.issuer || "Unknown"}
+                    <b>Domain Age</b>
 
-            </p>
+                    <br>
 
-            <p>
+                    ${data.domainAge ?? "Unknown"} days
 
-                <b>Expires In</b>
+                </p>
 
-                <br>
 
-                ${
-                    ssl.expiresIn === "Unknown" ||
-                    ssl.expiresIn === undefined
-                        ? "Unknown"
-                        : `${ssl.expiresIn} days`
-                }
+                <hr>
 
-            </p>
 
-            <p>
+                <!-- ============================== -->
+                <!-- SSL -->
+                <!-- ============================== -->
 
-                <b>Self Signed</b>
+                <h3>
+                    🔐 SSL Information
+                </h3>
 
-                <br>
 
-                ${ssl.selfSigned ? "Yes" : "No"}
+                <p>
 
-            </p>
+                    <b>Certificate Status</b>
 
-          
+                    <br>
 
-            <hr>
+                    ${ssl.valid
+                        ? "✅ Valid"
+                        : "❌ Invalid"}
 
-<h3>🌐 DNS Information</h3>
+                </p>
 
-<p>
 
-    <b>Hostname</b>
+                <p>
 
-    <br>
+                    <b>Issuer</b>
 
-    ${data.dns?.hostname || "Unknown"}
+                    <br>
 
-</p>
+                    ${ssl.issuer || "Unknown"}
 
-<p>
+                </p>
 
-    <b>IP Address</b>
 
-    <br>
+                <p>
 
-    ${
-        data.dns?.addresses && data.dns.addresses.length
-            ? data.dns.addresses.join("<br>")
-            : "Unavailable"
-    }
+                    <b>Expires In</b>
 
-</p>
+                    <br>
 
-<p>
+                    ${
+                        ssl.expiresIn === "Unknown" ||
+                        ssl.expiresIn === undefined
 
-    <b>Name Servers</b>
+                            ? "Unknown"
 
-    <br>
+                            : `${ssl.expiresIn} days`
+                    }
 
-    ${
-        data.dns?.nameservers && data.dns.nameservers.length
-            ? data.dns.nameservers.join("<br>")
-            : "Unavailable"
-    }
+                </p>
 
-</p>
 
-<hr>
+                <p>
 
-            <h3>🤖 AI Security Report</h3>
-            
+                    <b>Self Signed</b>
 
-            <p>
+                    <br>
 
-                ${ai.summary}
+                    ${ssl.selfSigned
+                        ? "Yes"
+                        : "No"}
 
-            </p>
+                </p>
 
-            <h4>Why?</h4>
 
-            <ul>
+                <hr>
 
-                ${ai.reasons.map(reason => `<li>${reason}</li>`).join("")}
 
-            </ul>
+                <!-- ============================== -->
+                <!-- DNS -->
+                <!-- ============================== -->
 
-            <h4>Recommendation</h4>
+                <h3>
+                    🌐 DNS Information
+                </h3>
 
-            <p>
 
-                ${ai.recommendation}
+                <p>
 
-            </p>
+                    <b>Hostname</b>
 
-            <hr>
+                    <br>
 
-            <p>
+                    ${data.dns?.hostname || "Unknown"}
 
-                <b>Confidence:</b>
+                </p>
 
-                ${ai.confidence}%
 
-            </p>
+                <p>
 
-            <hr>
+                    <b>IP Address</b>
 
-            <h4>Security Flags</h4>
+                    <br>
 
-            <ul>
+                    ${
+                        data.dns?.addresses &&
+                        data.dns.addresses.length
 
-                ${data.flags.map(flag => `<li>${flag}</li>`).join("")}
+                            ? data.dns.addresses.join("<br>")
 
-            </ul>
+                            : "Unavailable"
+                    }
 
-        </div>
+                </p>
+
+
+                <p>
+
+                    <b>Name Servers</b>
+
+                    <br>
+
+                    ${
+                        data.dns?.nameservers &&
+                        data.dns.nameservers.length
+
+                            ? data.dns.nameservers.join("<br>")
+
+                            : "Unavailable"
+                    }
+
+                </p>
+
+
+                <hr>
+
+
+                <!-- ============================== -->
+                <!-- AI Security Report -->
+                <!-- ============================== -->
+
+                <h3>
+                    🤖 AI Security Report
+                </h3>
+
+
+                <p>
+
+                    ${ai.summary}
+
+                </p>
+
+
+                <h4>
+                    Why?
+                </h4>
+
+
+                <ul>
+
+                    ${
+                        ai.reasons &&
+                        ai.reasons.length
+
+                            ? ai.reasons
+                                .map(
+                                    reason =>
+                                        `<li>${reason}</li>`
+                                )
+                                .join("")
+
+                            : "<li>No additional reasons provided.</li>"
+                    }
+
+                </ul>
+
+
+                <h4>
+                    Recommendation
+                </h4>
+
+
+                <p>
+
+                    ${ai.recommendation}
+
+                </p>
+
+
+                <hr>
+
+
+                <!-- ============================== -->
+                <!-- Confidence -->
+                <!-- ============================== -->
+
+                <p>
+
+                    <b>Confidence:</b>
+
+                    ${ai.confidence}%
+
+                </p>
+
+
+                <hr>
+
+
+                <!-- ============================== -->
+                <!-- Security Flags -->
+                <!-- ============================== -->
+
+                <h4>
+                    Security Flags
+                </h4>
+
+
+                <ul>
+
+                    ${
+                        data.flags &&
+                        data.flags.length
+
+                            ? data.flags
+                                .map(
+                                    flag =>
+                                        `<li>${flag}</li>`
+                                )
+                                .join("")
+
+                            : "<li>No security flags detected.</li>"
+                    }
+
+                </ul>
+
+
+            </div>
 
         `;
 

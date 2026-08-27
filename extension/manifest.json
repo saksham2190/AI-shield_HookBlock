@@ -12,8 +12,8 @@
   ],
 
   "host_permissions": [
-    "https://ai-shield-hookblock.onrender.com",
-    "<all_urls>"
+  "https://ai-shield-hookblock.onrender.com/*",
+  "<all_urls>"
   ],
 
   "background": {
