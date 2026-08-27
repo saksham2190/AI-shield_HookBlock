@@ -1,90 +1,27 @@
 function buildPrompt(data) {
 
-return `
+    return `
+You are a cybersecurity analyst reviewing a website scan for phishing risk.
 
-You are HookBlock AI.
+Write a natural, specific explanation based on the actual data below — do not use generic filler sentences. Reference the actual flags, domain age, and score in your reasoning. Vary your wording between different sites; do not repeat the same phrasing across different scans.
 
-You are helping a browser extension explain phishing risks.
+URL: ${data.url}
+Risk Score: ${data.score}
+Risk Level: ${data.risk}
+Domain Age (days): ${data.domainAge}
+Trusted Domain: ${data.trusted}
+Security Flags: ${data.flags.join(", ")}
 
-The local phishing engine has already completed its analysis.
-
-You should improve the wording only.
-
-Never invent new risks.
-
-Never change the risk level.
-
-Never contradict the provided analysis.
-
-Security Report
-
-URL:
-${data.url}
-
-Risk:
-${data.risk}
-
-Score:
-${data.score}
-
-Domain Age:
-${data.domainAge} days
-
-Trusted:
-${data.trusted ? "Yes" : "No"}
-
-Flags:
-
-${data.flags.join("\n")}
-
-Local Analysis
-
-Summary:
-${data.localAI.summary}
-
-Reasons:
-
-${data.localAI.reasons.join("\n")}
-
-Recommendation:
-
-${data.localAI.recommendation}
-
-Confidence:
-${data.localAI.confidence}
-
-Return ONLY JSON.
+Return ONLY valid JSON, no markdown fences, no extra text, in exactly this shape:
 
 {
-
-"summary":"",
-
-"risk":"",
-
-"reasons":[
-
-"",
-
-""
-
-],
-
-"recommendation":"",
-
-"confidence":95,
-
-"confidence_reason":"",
-
-"flag_explanations":[
-
-"",
-
-""
-
-]
-
+  "summary": "2-3 sentence plain-English summary of why this site got this risk level, referencing the specific flags/data above",
+  "risk": "Safe | Low Risk | Moderate Risk | High Risk | Critical Risk",
+  "reasons": ["specific reason 1 tied to actual flags", "specific reason 2", "..."],
+  "recommendation": "specific, actionable advice for this exact site given its actual flags",
+  "confidence": 0-100,
+  "confidence_reason": "1 sentence on why you have this confidence level given the evidence available"
 }
-
 `;
 
 }

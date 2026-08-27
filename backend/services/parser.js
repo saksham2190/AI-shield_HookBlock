@@ -1,50 +1,59 @@
-function parseAI(text) {
+function parseAIResponse(text) {
 
     try {
 
-        const data = JSON.parse(text);
+        let cleaned = text.replace(/```json/g, "");
+        cleaned = cleaned.replace(/```/g, "");
+        cleaned = cleaned.trim();
+
+        const parsed = JSON.parse(cleaned);
 
         return {
 
             summary:
-                data.summary || "No summary available.",
+                parsed.summary || null,
 
             risk:
-                data.risk || "UNKNOWN",
+                parsed.risk || null,
 
             reasons:
-                Array.isArray(data.reasons)
-                    ? data.reasons
-                    : [],
+                Array.isArray(parsed.reasons) ? parsed.reasons : [],
 
             recommendation:
-                data.recommendation ||
-                "Proceed carefully.",
+                parsed.recommendation || null,
 
             confidence:
-                typeof data.confidence === "number"
-                    ? data.confidence
-                    : 80,
+                typeof parsed.confidence === "number" ? parsed.confidence : null,
 
             confidence_reason:
-                data.confidence_reason ||
-                "Confidence calculated using multiple security indicators.",
+                parsed.confidence_reason || null,
 
             flag_explanations:
-                Array.isArray(data.flag_explanations)
-                    ? data.flag_explanations
-                    : []
+                Array.isArray(parsed.reasons) ? parsed.reasons : []
+
+        };
+
+    } catch (error) {
+
+        // Log the raw text so you can see exactly why parsing failed
+        // (bad JSON, markdown fences, refusal text, quota error text, etc.)
+        console.log("AI Parser Error:", error.message);
+        console.log("Raw Gemini output was:", text);
+
+        return {
+
+            summary: null,
+            risk: null,
+            reasons: [],
+            recommendation: null,
+            confidence: null,
+            confidence_reason: null,
+            flag_explanations: []
 
         };
 
     }
 
-    catch {
-
-        return {};
-
-    }
-
 }
 
-module.exports = parseAI;
+module.exports = parseAIResponse;

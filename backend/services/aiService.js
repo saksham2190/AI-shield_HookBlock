@@ -1,75 +1,59 @@
-const model = require("../config/geminiConfig");
-
-const buildPrompt = require("./promptBuilder");
-const parseAI = require("./parser");
-
-const buildLocalAI = require("./aiEngine");
-
-async function analyzeWithAI(data) {
-
-    // -----------------------------
-    // 1. Build Local AI First
-    // -----------------------------
-
-    const localAI = buildLocalAI(data);
+function parseAIResponse(text) {
 
     try {
 
-        const prompt = buildPrompt({
+        let cleaned = text.replace(/```json/g, "");
+        cleaned = cleaned.replace(/```/g, "");
+        cleaned = cleaned.trim();
 
-            ...data,
-
-            localAI
-
-        });
-
-        const result = await model.generateContent(prompt);
-
-        const response = await result.response;
-
-        const text = response.text();
-
-        const parsed = parseAI(text);
-
-        // -----------------------------------
-        // Merge Gemini response with Local AI
-        // -----------------------------------
+        const parsed = JSON.parse(cleaned);
 
         return {
 
             summary:
-                parsed.summary || localAI.summary,
+                parsed.summary || null,
 
             risk:
-                parsed.risk || data.risk,
+                parsed.risk || null,
 
             reasons:
-                parsed.reasons || localAI.reasons,
+                Array.isArray(parsed.reasons) ? parsed.reasons : [],
 
             recommendation:
-                parsed.recommendation || localAI.recommendation,
+                parsed.recommendation || null,
 
             confidence:
-                parsed.confidence || localAI.confidence,
+                typeof parsed.confidence === "number" ? parsed.confidence : null,
 
             confidence_reason:
-                parsed.confidence_reason || localAI.confidence_reason,
+                parsed.confidence_reason || null,
 
             flag_explanations:
-                parsed.flag_explanations || localAI.flag_explanations
+                Array.isArray(parsed.reasons) ? parsed.reasons : []
+
+        };
+
+    } catch (error) {
+
+        // Log the raw text so you can see exactly why parsing failed
+        // (bad JSON, markdown fences, refusal text, quota error text, etc.)
+        console.log("AI Parser Error:", error.message);
+        console.log("Raw Gemini output was:", text);
+
+        return {
+
+            summary: null,
+            risk: null,
+            reasons: [],
+            recommendation: null,
+            confidence: null,
+            confidence_reason: null,
+            flag_explanations: []
 
         };
 
     }
 
-    catch (error) {
-
-        console.log("Gemini unavailable. Using Local AI.");
-
-        return localAI;
-
-    }
-
 }
 
-module.exports = analyzeWithAI;
+module.exports = parseAIResponse;
