@@ -1,11 +1,26 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const path = require("path");
+const dotenv = require("dotenv");
+const { GoogleGenAI } = require("@google/genai");
 
-const genAI = new GoogleGenerativeAI(
-    process.env.GEMINI_API_KEY
-);
+// Ensure .env is loaded from backend directory if not already set
+if (!process.env.GEMINI_API_KEY) {
+    dotenv.config({ path: path.join(__dirname, "../.env") });
+}
 
-const model = genAI.getGenerativeModel({
-    model: "gemini-3.6-flash"
-});
+let aiInstance = null;
 
-module.exports = model;
+function getAI() {
+    if (!aiInstance) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.warn("⚠️ Warning: GEMINI_API_KEY is not set in environment variables.");
+        }
+        aiInstance = new GoogleGenAI({
+            apiKey: apiKey
+        });
+    }
+
+    return aiInstance;
+}
+
+module.exports = { getAI };

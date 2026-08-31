@@ -1,4 +1,5 @@
-const API_URL = "https://ai-shield-hookblock.onrender.com/api/analyze";
+const LOCAL_API_URL = "http://localhost:5000/api/analyze";
+const REMOTE_API_URL = "https://ai-shield-hookblock.onrender.com/api/analyze";
 
 // Extension Installed
 chrome.runtime.onInstalled.addListener(() => {
@@ -19,7 +20,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
 
                 // Update browser badge
-                updateBadge(result.score);
+                if (result && typeof result.score === "number") {
+                    updateBadge(result.score);
+                }
 
                 sendResponse(result);
 
@@ -51,24 +54,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 });
 
+async function postJSON(endpoint, body, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body),
+            signal: controller.signal
+        });
+        return await response.json();
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 async function analyzeWebsite(url) {
+    // 1. Try local backend first (best for active local development and updated Gemini AI)
+    try {
+        const localResult = await postJSON(LOCAL_API_URL, { url }, 4000);
+        if (localResult && localResult.success) {
+            return localResult;
+        }
+    } catch (err) {
+        console.log("Local backend not available, attempting remote backend fallback...", err.message);
+    }
 
-    const response = await fetch(API_URL, {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            url
-        })
-
-    });
-
-    return await response.json();
-
+    // 2. Fallback to deployed Render backend
+    return await postJSON(REMOTE_API_URL, { url }, 15000);
 }
 
 function updateBadge(score) {

@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -6,7 +7,7 @@ const analyzeRoute = require("./routes/analyzeRoute");
 const detectorRoute = require("./routes/detectorRoute");
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Create Express App
 const app = express();
